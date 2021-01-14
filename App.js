@@ -1,11 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Component }from 'react';
+import { View } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 
-export default function App() {
-  return (
-    <View>
-      <HomeScreen />
-    </View>
-  )
+export default class App extends Component{
+	render(){ 
+	  return (
+	    <View>
+	      <HomeScreen />
+	    </View>
+	  )
+	}
 }
