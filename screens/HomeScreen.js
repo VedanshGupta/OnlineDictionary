@@ -85,7 +85,7 @@ export default class HomeScreen extends Component{
             <View style={styles.detailsContainer}>
               <Text style={{FontSize:20}}>{
                 this.state.isSearchPressed && this.state.word === "Loading..."
-                ? this.state.word:""
+                ? this.state.word : ""
               }
               </Text>
               {
