@@ -1,157 +1,159 @@
-import React from 'react';
-import { Component } from 'react';
-import { StyleSheet, Text, View, TextInput, touchableOpacity } from 'react-native';
-
+import React, { Component } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Header } from 'react-native-elements';
 export default class HomeScreen extends Component{
-	constructor(){
+  constructor() {
     super();
-    this.state={
+    this.state = {
       text: '',
-      displayText: '',
-      isSearchPressed: '',
-  	  word: '',
-  	  lexicalCategory: '',
-   	  examples:[],
-  	  definition: ''
+      isSearchPressed: false,
+      isLoading: false,
+      word  : "Loading...",
+      lexicalCategory :'',
+      definition : ""
     };
-	}
-	getWord=(word)=>{
-		var searchKeyword = word.toLowerCase()
-		var url = "https://rupinwhitehatjr.github.io/dictionary/"+searchKeyword+".json"
-		console.log(url)
-		return fetch(url)
-		.then((data)=>{
-			if(data.status===200){
-				return data.json()
-			}else{
-				return null
-			}
-		})
-		.then((response)=>{
-			console.log(response)
-			var responseObject = response
-			if(responseObject){
-				var wordData = responseObject.definitions[0]
-				var definition = wordData.description
-				var lexicalCategory = wordData.wordType
-
-				this.setState({
-					"word": this.state.text,
-					"definition": definition,
-					"lexicalCategory": lexicalCategory
-				})
-			}else{
-				this.setState({
-					"word": this.state.text,
-				"definition": "Not Found",
-				})
-			}
-		})
-	}
-
-	render(){
-		return(
-			<View>
-				 <View style={styles.detailsContainer}>
-					<Text style={styles.buttonText}>Word:{" "}</Text>
-					<Text style={{fontSize:18}}>{this.state.word}</Text>
-				 </View>
-
-				 <View style={styles.detailsContainer}>
-					<Text style={styles.buttonText}>Type:{" "}</Text>
-					<Text style={{fontSize:18}}>{this.state.lexicalCategory}</Text>
-				 </View>
-
-				 <View style={{flexDirection:'row', flexWarp: 'wrap'}}>
-					<Text style={styles.buttonText}>Definition:{" "}</Text>
-					<Text style={{fontSize:18}}>{this.state.definition}</Text>
-				 </View>
-
-				<TextInput
-		          style={ styles.inputBox }
-		          onChangeText={text => {
-		          	this.setState({
-		          		text:text,
-		          		isSearchPressed: false,
-		          		word: "loading...",
-		          		lexicalCategory: '',
-		          		examples:[],
-		          		definition: ""
-		          	});
-		          }}
-		          value={this.state.text}
-        		/>
-
-            <View style={styles.detailsContainer}>
-              <Text style={{FontSize:20}}>{
-                this.state.isSearchPressed && this.state.word === "Loading..."
-                ? this.state.word : ""
-              }
-              </Text>
-              {
-                this.state.word!=="Loading..."?(
-                  <View style={{justifyContent:center,marginleft:10}}>
-                    <View style={styles.detailsContainer}>
-                      <Text style={styles.displayText}>
-                      Word:{""}
-                      </Text>
-                      <Text style={{fontSize:18}}>
-                      {this.state.word}
-                      </Text>
-                    </View>
-                    <View style={styles.detailsContainer}>
-                      <Text style={styles.displayText}>
-                      Type:{""}
-                      </Text>
-                      <Text style={{fontSize:18}}>
-                      {this.state.lexicalCategory}
-                      </Text>
-                    </View>
-                  </View>
-    )
   }
 
-        		<touchableOpacity 
-        		style={styles.searchButton} 
-        		onPress={()=>{
-        			this.setState({isSearchPressed:true});
-        			this.getWord(this.state.text);
-        		}}>
-        			<Text style={styles.buttonText}>Search</Text>
-        		</touchableOpacity>
-    		</View>
-		)
-	}
+  getWord=(word)=>{
+    var url = "https://whitehat-dictionary.glitch.me/?word=" + word
+    return fetch(url)
+    .then((data)=>{
+      return data.json()
+    })
+    .then((response)=>{
+      var responseObject = JSON.parse(response);
+      var word = responseObject.word
+      var lexicalCategory = responseObject.results[0].lexicalEntries[0].lexicalCategory.text
+      var definition = responseObject.results[0].lexicalEntries[0].entries[0].senses[0].definitions[0]
+      this.setState({
+        "word" : word.trim(),
+        "lexicalCategory" : lexicalCategory === undefined ? "" : lexicalCategory.trim(),
+        "definition" : definition === undefined ? "" : definition.trim(),
+      })
+    })
+  }
+
+  render(){
+    return(
+      <View style={{flex:1, borderWidth:2}}>
+        <Header
+          backgroundColor={'purple'}
+          centerComponent={{
+            text: 'Pocket Dictionary',
+            style: { color: '#fff', fontSize: 20 },
+          }}
+        />
+        <View style={styles.inputBoxContainer}>
+          <TextInput
+            style={styles.inputBox}
+            onChangeText={text => {
+              this.setState({
+                text: text,
+                isSearchPressed: false,
+                word  : "Loading...",
+                lexicalCategory :'',
+                examples : [],
+                defination : ""
+              });
+            }}
+            value={this.state.text}
+          />
+
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => {
+              this.setState({ isSearchPressed: true });
+              this.getWord(this.state.text)
+            }}>
+            <Text style={styles.searchText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.outputContainer}>
+          <Text style={{fontSize:20}}>
+            {
+              this.state.isSearchPressed && this.state.word === "Loading..."
+              ? this.state.word
+              : ""
+            }
+          </Text>
+            {
+              this.state.word !== "Loading..." ?
+              (
+                <View style={{justifyContent:'center', marginLeft:10 }}>
+                  <View style={styles.detailsContainer}>
+                    <Text style={styles.detailsTitle}>
+                      Word :{" "}
+                    </Text>
+                    <Text style={{fontSize:18 }}>
+                      {this.state.word}
+                    </Text>
+                  </View>
+                  <View style={styles.detailsContainer}>
+                    <Text style={styles.detailsTitle}>
+                      Type :{" "}
+                    </Text>
+                    <Text style={{fontSize:18}}>
+                      {this.state.lexicalCategory}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection:'row',flexWrap: 'wrap'}}>
+                    <Text style={styles.detailsTitle}>
+                      Definition :{" "}
+                    </Text>
+                    <Text style={{ fontSize:18}}>
+                      {this.state.definition}
+                    </Text>
+                  </View>
+                </View>
+              )
+              :null
+            }
+        </View>
+      </View>
+    )
+  }
 }
 
 const styles = StyleSheet.create({
-  detailsContainer: {
+  container: {
     flex: 1,
-    backgroundColor: '#b8b8b8',
+  },
+  inputBoxContainer: {
+    flex:0.3,
+    alignItems:'center',
+    justifyContent:'center'
   },
   inputBox: {
-    marginTop: 200,
     width: '80%',
     alignSelf: 'center',
     height: 40,
     textAlign: 'center',
     borderWidth: 4,
-    outline: 'none',
   },
   searchButton: {
-    width: '50%',
-    height: 55,
-    alignSelf: 'center',
-    padding: 10,
+    width: '40%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 10,
+    borderWidth: 2,
+    borderRadius: 10,
   },
-  buttonText: {
-    textAlign: 'center',
-    fontSize: 30,
-    fontWeight: 'bold',
+  searchText:{
+    fontSize: 20,
+    fontWeight: 'bold'
   },
-  displayText: {
-    textAlign: 'center',
-    fontSize: 30,
+  outputContainer:{
+    flex:0.7,
+    alignItems:'center'
   },
+  detailsContainer:{
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  detailsTitle:{
+    color:'orange',
+    fontSize:20,
+    fontWeight:'bold'
+  }
 });
